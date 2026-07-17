@@ -3,11 +3,45 @@ import 'package:flutter/material.dart';
 import '../../../../shared/widgets/rk_app_bar.dart';
 import '../widgets/overview_card.dart';
 import '../widgets/project_card.dart';
-import '../../../core/constants/demo_data.dart';
+import '../../../core/storage/project_repository.dart';
+import '../../../shared/models/project_model.dart';
 import '../../urls/screens/add_project_screen.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  final ProjectRepository _repository = ProjectRepository();
+
+  List<ProjectModel> projects = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProjects();
+  }
+
+  Future<void> _loadProjects() async {
+    final data = _repository.getAllProjects();
+    debugPrint("Dashboard loaded ${data.length} projects");
+
+    setState(() {
+      projects = data;
+    });
+  }
+
+  Future<void> _openAddProject() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const AddProjectScreen()),
+    );
+
+    _loadProjects();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,12 +49,7 @@ class DashboardScreen extends StatelessWidget {
       appBar: const RKAppBar(title: "RenderKeeper"),
 
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AddProjectScreen()),
-          );
-        },
+        onPressed: _openAddProject,
         child: const Icon(Icons.add),
       ),
 
@@ -48,11 +77,22 @@ class DashboardScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              Column(
-                children: demoProjects
-                    .map((project) => ProjectCard(project: project))
-                    .toList(),
-              ),
+              if (projects.isEmpty)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 30),
+                    child: Text(
+                      "No Projects Added Yet",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                )
+              else
+                Column(
+                  children: projects
+                      .map((project) => ProjectCard(project: project))
+                      .toList(),
+                ),
             ],
           ),
         ),

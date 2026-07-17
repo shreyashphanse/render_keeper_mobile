@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../widgets/service_form_card.dart';
 import '../../../shared/models/service_type.dart';
+import '../../../core/storage/project_repository.dart';
+import '../../../core/utils/id_generator.dart';
+import '../../../shared/models/project_model.dart';
+import '../../../shared/models/service_model.dart';
 
 class AddProjectScreen extends StatefulWidget {
   const AddProjectScreen({super.key});
@@ -11,6 +15,7 @@ class AddProjectScreen extends StatefulWidget {
 }
 
 class _AddProjectScreenState extends State<AddProjectScreen> {
+  final ProjectRepository _repository = ProjectRepository();
   final _formKey = GlobalKey<FormState>();
   final _projectNameController = TextEditingController();
 
@@ -36,6 +41,37 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
     }
 
     super.dispose();
+  }
+
+  Future<void> _saveProject() async {
+    final services = <ServiceModel>[];
+
+    for (int i = 0; i < serviceNameControllers.length; i++) {
+      services.add(
+        ServiceModel(
+          id: IdGenerator.generate(),
+          name: serviceNameControllers[i].text.trim(),
+          url: serviceUrlControllers[i].text.trim(),
+          type: serviceTypes[i],
+          online: false,
+        ),
+      );
+    }
+
+    final project = ProjectModel(
+      id: IdGenerator.generate(),
+      name: _projectNameController.text.trim(),
+      services: services,
+    );
+
+    await _repository.addProject(project);
+
+    debugPrint("Saved project: ${project.name}");
+    debugPrint("Projects in box: ${_repository.getAllProjects().length}");
+
+    if (!mounted) return;
+
+    Navigator.pop(context);
   }
 
   @override
@@ -119,11 +155,9 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Validation Successful")),
-                      );
+                      await _saveProject();
                     }
                   },
                   child: const Text("Save Project"),
