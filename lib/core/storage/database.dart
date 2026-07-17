@@ -3,7 +3,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../../shared/models/project_model.dart';
 import '../../shared/models/service_model.dart';
 import '../../shared/models/service_type.dart';
-
+import '../../shared/models/log_entry_model.dart';
+import '../../shared/models/settings_model.dart';
 import 'hive_boxes.dart';
 
 class Database {
@@ -24,9 +25,19 @@ class Database {
         Hive.registerAdapter(ServiceTypeAdapter());
       }
 
+      if (!Hive.isAdapterRegistered(3)) {
+        print("Registering LogEntryModelAdapter");
+        Hive.registerAdapter(LogEntryModelAdapter());
+      }
+
       if (!Hive.isAdapterRegistered(0)) {
         print("Registering ServiceModelAdapter");
         Hive.registerAdapter(ServiceModelAdapter());
+      }
+
+      if (!Hive.isAdapterRegistered(4)) {
+        print("Registering SettingsModelAdapter");
+        Hive.registerAdapter(SettingsModelAdapter());
       }
 
       if (!Hive.isAdapterRegistered(1)) {
@@ -36,6 +47,12 @@ class Database {
 
       print("Opening projects box...");
       await Hive.openBox<ProjectModel>(HiveBoxes.projects);
+
+      print("Opening settings box...");
+      await Hive.openBox<SettingsModel>(HiveBoxes.settings);
+
+      print("Opening logs box...");
+      await Hive.openBox<LogEntryModel>(HiveBoxes.logs);
 
       print("=== Hive Initialization Complete ===");
     } catch (e, stackTrace) {

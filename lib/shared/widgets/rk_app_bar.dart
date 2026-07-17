@@ -4,8 +4,9 @@ import '../../core/constants/app_colors.dart';
 
 class RKAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+  final List<Widget>? actions;
 
-  const RKAppBar({super.key, required this.title});
+  const RKAppBar({super.key, required this.title, this.actions});
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +18,7 @@ class RKAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: AppColors.background,
       elevation: 0,
       centerTitle: false,
+      actions: actions,
     );
   }
 

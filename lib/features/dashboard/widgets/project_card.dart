@@ -5,8 +5,9 @@ import 'service_card.dart';
 
 class ProjectCard extends StatefulWidget {
   final ProjectModel project;
+  final VoidCallback? onDelete;
 
-  const ProjectCard({super.key, required this.project});
+  const ProjectCard({super.key, required this.project, this.onDelete});
 
   @override
   State<ProjectCard> createState() => _ProjectCardState();
@@ -30,9 +31,30 @@ class _ProjectCardState extends State<ProjectCard> {
           });
         },
 
-        title: Text(
-          widget.project.name,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                widget.project.name,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == "delete") {
+                  widget.onDelete?.call();
+                }
+              },
+              itemBuilder: (context) => const [
+                PopupMenuItem(value: "edit", child: Text("Edit")),
+                PopupMenuItem(value: "delete", child: Text("Delete")),
+              ],
+            ),
+          ],
         ),
 
         subtitle: Text("${widget.project.services.length} Services"),
@@ -44,6 +66,8 @@ class _ProjectCardState extends State<ProjectCard> {
                 child: ServiceCard(
                   serviceName: service.name,
                   online: service.online,
+                  statusCode: service.statusCode,
+                  responseTime: service.responseTime,
                 ),
               ),
             )
